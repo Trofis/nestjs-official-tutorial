@@ -1,32 +1,38 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { CoffeesService } from './coffees.service';
+import { Coffee } from './entities/coffee.entity';
+import { CreateCoffeeDto } from './dto/create.coffee.dto';
+import { UpdateCoffeeDto } from './dto/update.coffee.dto';
 
 @Controller('coffees')
 export class CoffeesController {
 
+    constructor(private readonly coffeesService: CoffeesService) {}
+
     @Get()  
-    findAll(@Query() paginationQuery: any): string {
-        const { limit, offset } = paginationQuery
+    findAll(@Query() paginationQuery: any): Coffee[] {
+        //const { limit, offset } = paginationQuery
         
-        return 'This action returns all coffees, limit: ' + limit + ', offset: ' + offset
+        return this.coffeesService.findAll()
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string): string {
-        return `This action returns a #${id} coffee`
+    findOne(@Param('id') id: string): Coffee {
+        return this.coffeesService.findOne(id)
     }
 
     @Post()
-    create(@Body() createCoffeeDto: any): string {
-        return createCoffeeDto
+    create(@Body() createCoffeeDto: CreateCoffeeDto): Coffee {
+        return this.coffeesService.create(createCoffeeDto)
     }
 
     @Patch(':id')
-    update(@Param('id') id: string, @Body() updateCoffeeDto: any): string {
-        return `This action updates a #${id} coffee`
+    update(@Param('id') id: string, @Body() updateCoffeeDto: UpdateCoffeeDto): Coffee {
+        return this.coffeesService.update(id, updateCoffeeDto)
     }
 
     @Delete(':id')
     remove(@Param('id') id: string): string {
-        return `This action removes a #${id} coffee`
+        return  this.coffeesService.remove(id)
     }
 }
