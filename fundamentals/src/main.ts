@@ -9,6 +9,9 @@ async function bootstrap() {
     whitelist: true, // Remove other properties not listed
     forbidNonWhitelisted: true, // Return error if other properties not listed
     transform: true, // Transform properties to expected types
+    transformOptions: {
+      enableImplicitConversion: true,
+    },
   }));
 
   await app.listen(process.env.PORT ?? 3000);
