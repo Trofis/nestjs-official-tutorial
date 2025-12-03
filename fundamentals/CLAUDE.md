@@ -62,12 +62,17 @@ docker-compose -f ../docker-compose.yml down
 
 The application follows NestJS modular architecture:
 
-- **AppModule** (`src/app.module.ts`): Root module that imports TypeOrmModule and CoffeesModule
+- **AppModule** (`src/app.module.ts`): Root module that imports TypeOrmModule, CoffeesModule, and CoffeeRatingModule
 - **CoffeesModule** (`src/coffees/`): Feature module for coffee-related operations
   - Controller: `coffees.controller.ts` - handles HTTP requests (GET, POST, PATCH, DELETE)
   - Service: `coffees.service.ts` - business logic and database operations
   - Entity: `entities/coffee.entity.ts` - TypeORM entity definition
   - DTOs: `dto/create.coffee.dto.ts` and `dto/update.coffee.dto.ts` - data validation
+  - Constants: `coffees.constant.ts` - defines injection tokens (e.g., `COFFEE_BRANDS`)
+  - Exports: `CoffeesService` for use in other modules
+- **CoffeeRatingModule** (`src/coffee-rating/`): Demonstrates module dependency injection
+  - Service: `coffee-rating.service.ts` - injects `CoffeesService` from imported `CoffeesModule`
+  - Imports: `CoffeesModule` to access exported services
 
 ### Validation Pipeline
 
@@ -106,6 +111,42 @@ constructor(
 **Update DTOs**: Use `@nestjs/mapped-types` PartialType to make all fields optional:
 ```typescript
 export class UpdateCoffeeDto extends PartialType(CreateCoffeeDto) {}
+```
+
+### Custom Providers
+
+The `CoffeesModule` demonstrates different custom provider patterns:
+
+**Class Providers** (`useClass`): Conditionally provide different implementations based on environment:
+```typescript
+{
+  provide: ConfigService,
+  useClass: process.env.NODE_ENV === 'development'
+    ? DevelopmentConfigService
+    : ProductionConfigService
+}
+```
+
+**Factory Providers** (`useFactory`): Asynchronously create provider values with dependency injection:
+```typescript
+{
+  provide: COFFEE_BRANDS, // String token from coffees.constant.ts
+  useFactory: async (dataSource: DataSource): Promise<string[]> => {
+    const coffeeBrands = await Promise.resolve(['buddy brew', 'nescafe'])
+    return coffeeBrands
+  },
+  inject: [DataSource] // Dependencies injected into factory function
+}
+```
+
+**Provider Tokens**: Custom providers use string tokens defined in `coffees.constant.ts`:
+```typescript
+export const COFFEE_BRANDS = 'COFFEE_BRANDS'
+```
+
+**Injecting Custom Providers**: Use `@Inject()` decorator with the token:
+```typescript
+constructor(@Inject(COFFEE_BRANDS) brands: string[]) {}
 ```
 
 ## Code Conventions
