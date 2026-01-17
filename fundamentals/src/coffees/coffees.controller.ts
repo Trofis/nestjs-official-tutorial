@@ -17,21 +17,29 @@ import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto/paginati
 import { REQUEST } from '@nestjs/core';
 import { Public } from 'src/common/decorators/public.decorators';
 import { ParseIntPipe } from 'src/common/pipes/parse-int/parse-int.pipe';
+import { Protocol } from 'src/common/decorators/protocol.decorator';
+import { ConfigService, ConfigType } from '@nestjs/config';
+import coffeesConfig from './config/coffees.config';
 
 @Controller('coffees')
 export class CoffeesController {
   constructor(
     private readonly coffeesService: CoffeesService,
     @Inject(REQUEST) private readonly request: Request,
+    @Inject(coffeesConfig.KEY)
+    private readonly coffeesConfiguration: ConfigType<typeof coffeesConfig>,
   ) {
     console.log('CoffeesController constructor');
+    console.log(this.coffeesConfiguration.foo);
   }
 
   @Public()
   @Get()
   async findAll(
+    @Protocol('https') protocol: string,
     @Query() paginationQuery: PaginationQueryDto,
   ): Promise<Coffee[]> {
+    console.log(protocol);
     await new Promise((resolve) => setTimeout(resolve, 5000));
     return this.coffeesService.findAll(paginationQuery);
   }

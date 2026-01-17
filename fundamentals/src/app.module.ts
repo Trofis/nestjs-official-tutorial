@@ -7,7 +7,7 @@ import { CoffeeRatingModule } from './coffee-rating/coffee-rating.module';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
-import * as Joi from '@hapi/joi'
+import * as Joi from '@hapi/joi';
 import appConfig from './config/app.config';
 
 @Module({
@@ -21,13 +21,14 @@ import appConfig from './config/app.config';
     //     DATABASE_PASSWORD: Joi.string().required(),
     //     DATABASE_NAME: Joi.string().required(),
     //   })
-    // }),  
+    // }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig],
     }),
+    // Preventing order of execution of modules
     TypeOrmModule.forRootAsync({
-      useFactory:() => ({
+      useFactory: () => ({
         type: 'postgres',
         host: process.env.DATABASE_HOST,
         port: +process.env.DATABASE_PORT,
@@ -36,7 +37,7 @@ import appConfig from './config/app.config';
         database: process.env.DATABASE_NAME,
         autoLoadEntities: true,
         synchronize: true,
-      }), 
+      }),
     }),
     DatabaseModule,
     CoffeesModule,
